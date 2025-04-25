@@ -1,13 +1,12 @@
 
 ToDo: Matan
-    1.try to play with the
-        min_detection_confidence=0.5,
-        min_tracking_confidence=0.5,
-
-    2. if you have spare time maybe you want to make the close hand more robasst
+    1. if you have spare time maybe you want to make the close hand more robasst
         you can use the points at the bottom of your hand
 
-    3. make steroid pool
+    2. make the jat stay in the oriantation it was before you stoped moving
+
+    3.
+
 
 
 ToDo: Tom

@@ -1,0 +1,17 @@
+HandRecognitionGameJam/
+│
+├── main.py
+│
+├── helpers.py
+├── tracking.py
+│
+├── sprites/
+│   ├── __init__.py
+│   ├── bullet.py
+│   ├── asteroid.py
+│   └── spaceship.py
+│
+└── assets/
+    ├── backgrounds/
+    ├── asteroid/
+    └── Engine/
