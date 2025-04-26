@@ -1,4 +1,4 @@
-# Hand-Controlled Space Shooter 🚀🖐️
+# Hand-Controlled Space Shooter 
 
 A Pygame project where you control a spaceship **with your hands** using a webcam!  
 Move your ship with your left hand and shoot by opening your right hand.
