@@ -25,7 +25,7 @@ class Asteroid(pygame.sprite.Sprite):
             pos = (screen_w + 40, random.randint(0, screen_h))
 
         self.rect = self.image.get_rect(center=pos)
-        # self.mask = pygame.mask.from_surface(self.image)
+        self.mask = pygame.mask.from_surface(self.image)
 
 
         # Drift toward rough centre

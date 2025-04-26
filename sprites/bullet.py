@@ -51,6 +51,8 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=pos)
         self.angle = 0
 
+        self.mask = pygame.mask.from_surface(self.image)
+
         # Velocity
         self.vel = (direction.normalize() * self.SPEED
                     if direction.length_squared() > 0.1 else Vector2(0, -self.SPEED))
@@ -65,6 +67,20 @@ class Bullet(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.base_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
+        # Update mask for pixel‑perfect collision
+        self.mask = pygame.mask.from_surface(self.image)
+
         # Auto‑despawn when off‑screen
         if not pygame.display.get_surface().get_rect().colliderect(self.rect):
             self.kill()
+
+    def draw_debug(self, surface):
+        """Draw the bullet's bounding box and mask."""
+        pygame.draw.rect(surface, (255, 0, 0), self.rect, 1)  # Bounding box
+        if hasattr(self, 'mask') and self.mask:
+            from pygame import Surface
+            debug_mask = self.mask.to_surface(setcolor=(0, 255, 0, 100), unsetcolor=(0, 0, 0, 0))
+            surface.blit(debug_mask, self.rect.topleft)
+
+
+
