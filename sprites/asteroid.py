@@ -25,6 +25,8 @@ class Asteroid(pygame.sprite.Sprite):
             pos = (screen_w + 40, random.randint(0, screen_h))
 
         self.rect = self.image.get_rect(center=pos)
+        # self.mask = pygame.mask.from_surface(self.image)
+
 
         # Drift toward rough centre
         target = (screen_w // 2 + random.randint(-100, 100),
@@ -42,6 +44,7 @@ class Asteroid(pygame.sprite.Sprite):
         self.angle = (self.angle + self.rotation_speed) % 360
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
+        self.mask = pygame.mask.from_surface(self.image)
 
         # Despawn when far off-screen
         if not self.screen_rect.inflate(100, 100).colliderect(self.rect):

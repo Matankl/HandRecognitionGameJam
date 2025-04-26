@@ -11,16 +11,21 @@ from tracking import hand_is_open, center_px   # re-use helpers
 mp_hands = mp.solutions.hands
 
 class Spaceship(pygame.sprite.Sprite):
-    BULLET_COOLDOWN = 200        # ms
+    BULLET_COOLDOWN = 500        # ms
     INVINCIBLE_MS  = 1000
     ANIM_SPEED     = 100         # ms per frame
+
 
     def __init__(self, pos, images, bullet_group: pygame.sprite.Group):
         super().__init__()
         self.images = images
         self.image_index = 0
         self.image = self.images[0]
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=pos)
+        self._last_angle = 0  # store last rotation
+        self._current_angle = 0  # For smooth interpolation
+        self.ROTATE_SMOOTHNESS = 0.15  # Adjust this from 0.05 (slow) to 0.3 (fast)
 
         self.bullets = bullet_group
         self.health  = 5
@@ -62,27 +67,38 @@ class Spaceship(pygame.sprite.Sprite):
                 self.bullets.add(Bullet(Vector2(self.rect.center), direction))
                 self._last_shot = now
 
-    # ────────────────────────────────
-    # Update cycle
-    # ────────────────────────────────
+
     def update(self):
         self.rect.clamp_ip(pygame.display.get_surface().get_rect())
+        now = pygame.time.get_ticks()
 
         # Animation
-        now = pygame.time.get_ticks()
         if now - self._last_anim >= self.ANIM_SPEED:
             self.image_index = (self.image_index + 1) % len(self.images)
-            self.image = self.images[self.image_index]
             self._last_anim = now
 
-        # Rotate slightly toward travel direction
+        current_frame = self.images[self.image_index]
+
+        # Calculate movement direction
         move_vec = Vector2(self.rect.center) - self._last_pos
         if move_vec.length_squared() > 4:
-            angle = move_vec.angle_to(Vector2(0, -1))  # up-vector
-            self.image = pygame.transform.rotate(self.images[self.image_index], angle)
-            self.rect = self.image.get_rect(center=self.rect.center)
+            target_angle = move_vec.angle_to(Vector2(0, -1))  # up is 0°
+            self._last_pos = Vector2(self.rect.center)
+        else:
+            target_angle = self._last_angle  # no big move → reuse
 
-        # Invincibility flash
+        # Smooth rotation
+        # Wrap angle to avoid jumps when crossing -180° ↔ +180°
+        diff = (target_angle - self._current_angle + 180) % 360 - 180
+        self._current_angle += diff * self.ROTATE_SMOOTHNESS
+        self._last_angle = target_angle
+
+        # Rotate image
+        self.image = pygame.transform.rotate(current_frame, self._current_angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
+        self.mask = pygame.mask.from_surface(self.image)
+
+        # Flash if invincible
         if self.invincible and (now // 100) % 2:
             self.image.set_alpha(80)
         else:

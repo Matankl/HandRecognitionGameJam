@@ -4,12 +4,12 @@ Game entry-point: sets up Pygame, camera and main loop.
 """
 
 from __future__ import annotations
-import sys, random, pygame, cv2
+import sys, random, cv2
 import pygame
 from pygame import Vector2
 from pathlib import Path
 
-from helpers  import load_images_from_folder, scale_random, parallax_offset, webcam_surface_with_alpha
+from helpers  import load_images_from_folder, scale_random, parallax_offset, webcam_surface_with_alpha, draw_mask
 from tracking import grab_frame, detect_hands
 from sprites  import Spaceship, Asteroid   # Bullet is created internally by Spaceship
 
@@ -49,13 +49,14 @@ bg2 = pygame.transform.scale(pygame.image.load(BG2), (int(WIDTH*BG_ZOOM), int(HE
 # ───────────────────────────────────────────────
 # Sprite groups
 # ───────────────────────────────────────────────
-all_sprites   = pygame.sprite.Group()
-bullet_group  = pygame.sprite.Group()
-asteroid_group= pygame.sprite.Group()
+all_sprites = pygame.sprite.Group()
+bullet_group = pygame.sprite.Group()
+asteroid_group = pygame.sprite.Group()
 
 ship = Spaceship((WIDTH//2, HEIGHT-80), ship_images, bullet_group)
 all_sprites.add(ship)
 all_sprites.add(bullet_group)
+all_sprites.add(asteroid_group)
 
 # Periodic asteroid spawn
 ASTEROID_EVENT = pygame.USEREVENT + 1
@@ -95,7 +96,7 @@ while running:
 
 
     # Collisions ----------------------------------------------
-    if pygame.sprite.spritecollide(ship, asteroid_group, dokill=True):
+    if pygame.sprite.spritecollide(ship, asteroid_group, dokill=True, collided=pygame.sprite.collide_mask):
         ship.hit()
     destroyed = pygame.sprite.groupcollide(asteroid_group, bullet_group, True, True)
     ship.score += len(destroyed)
@@ -103,9 +104,9 @@ while running:
     # Draw -----------------------------------------------------
     if frame_bgr is not None:
         screen.blit(bg0, parallax_offset(Vector2(ship.rect.center), .02, bg0.get_size(), WIDTH, HEIGHT))
-        screen.blit(bg1, parallax_offset(Vector2(ship.rect.center), .04, bg1.get_size(), WIDTH, HEIGHT))
-        screen.blit(bg2, parallax_offset(Vector2(ship.rect.center), .06, bg2.get_size(), WIDTH, HEIGHT))
-        screen.blit(webcam_surface_with_alpha(frame_bgr, 25), (0, 0))
+        screen.blit(bg1, parallax_offset(Vector2(ship.rect.center), .06, bg1.get_size(), WIDTH, HEIGHT))
+        screen.blit(bg2, parallax_offset(Vector2(ship.rect.center), .10, bg2.get_size(), WIDTH, HEIGHT))
+        screen.blit(webcam_surface_with_alpha(frame_bgr, 35), (0, 0))
     else:
         screen.fill((10, 10, 30))
 
@@ -115,10 +116,11 @@ while running:
 
     # Debug: draw bounding boxes
     if DEBUG:
-        for s in all_sprites:
-            pygame.draw.rect(screen, (255, 0, 0), s.rect, 1)
-        for b in bullet_group:
-            pygame.draw.rect(screen, (0, 255, 0), b.rect, 1)
+        draw_mask(screen, ship.mask, ship.rect.topleft)
+        for asteroid in asteroid_group:
+            draw_mask(screen, asteroid.mask, asteroid.rect.topleft)
+        for sprite in all_sprites:
+            pygame.draw.rect(screen, (255, 0, 0), sprite.rect, 2)
 
     hud = pygame.font.SysFont(None, 28).render(
         f'Health: {ship.health}   Score: {ship.score}', True, (255,255,255))

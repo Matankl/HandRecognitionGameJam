@@ -22,7 +22,7 @@ def grab_frame(cam, w: int, h: int):
         return None, None
     frame = cv2.flip(frame, 1)            # mirror left/right
     frame = cv2.resize(frame, (w, h))
-    frame = cv2.GaussianBlur(frame, (15, 15), sigmaX=0)
+    frame = cv2.GaussianBlur(frame, (41, 41), sigmaX=0)
     return frame, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
 # ────────────────────────────────

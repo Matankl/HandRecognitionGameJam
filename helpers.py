@@ -52,3 +52,9 @@ def webcam_surface_with_alpha(frame_bgr, alpha_val: int = 50) -> pygame.Surface:
     alpha = np.full((h, w, 1), alpha_val, np.uint8)
     frame_rgba = np.concatenate((frame_rgb, alpha), axis=2)
     return pygame.image.frombuffer(frame_rgba.tobytes(), (w, h), "RGBA").convert_alpha()
+
+def draw_mask(surface, mask, offset):
+    for x in range(mask.get_size()[0]):
+        for y in range(mask.get_size()[1]):
+            if mask.get_at((x, y)):
+                surface.set_at((x + offset[0], y + offset[1]), (0, 255, 0))  # green pixel
